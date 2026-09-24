@@ -1,9 +1,14 @@
 import React from 'react';
-import { SNACKS_DATA, getWhatsAppOrderLink } from '../data/products';
-import { ArrowUpRight, Flame, Sparkles, Clock, AlertCircle } from 'lucide-react';
+import { useData } from '../context/DataContext';
+import { SNACKS_DATA } from '../data/products';
+import { ArrowUpRight, Flame, Clock } from 'lucide-react';
 
 export default function SnacksZone() {
-  const { headline, subheadline, products } = SNACKS_DATA;
+  const { products, getWhatsAppOrderLink } = useData();
+  const { headline, subheadline } = SNACKS_DATA;
+
+  // Filter dynamic snacks
+  const snackItems = products.filter((p) => p.category === 'snacks' && p.is_active !== false);
 
   // Gentle playful rotations for asymmetrical look
   const rotationClasses = [
@@ -48,8 +53,11 @@ export default function SnacksZone() {
 
         {/* Asymmetrical Snack Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
-          {products.map((item, index) => {
+          {snackItems.map((item, index) => {
             const rotClass = rotationClasses[index % rotationClasses.length];
+            const imgSrc = item.image_url || item.image;
+            const packSize = item.pack_size || item.packSize;
+            const isComingSoon = Boolean(item.is_coming_soon || item.isComingSoon);
 
             return (
               <div
@@ -57,15 +65,17 @@ export default function SnacksZone() {
                 className={`relative flex flex-col justify-between p-5 sm:p-6 rounded-faudi-lg bg-white border-3 border-brand-black shadow-bold transition-all duration-300 hover:-translate-y-2 hover:shadow-bold-lg ${rotClass}`}
               >
                 {/* Sticker Badge */}
-                <div className="absolute -top-3.5 left-5 z-20">
-                  <span className={`px-3 py-1 rounded-faudi border-2 border-brand-black text-xs font-sub font-bold uppercase tracking-wider shadow-bold-sm ${item.badgeColor}`}>
-                    {item.badge}
-                  </span>
-                </div>
+                {item.badge && (
+                  <div className="absolute -top-3.5 left-5 z-20">
+                    <span className={`px-3 py-1 rounded-faudi border-2 border-brand-black text-xs font-sub font-bold uppercase tracking-wider shadow-bold-sm ${item.badge_color || item.badgeColor || 'bg-red-500 text-white'}`}>
+                      {item.badge}
+                    </span>
+                  </div>
+                )}
 
-                {/* Top Image or Neutral Photo Placeholder */}
-                <div className="relative w-full h-52 sm:h-56 rounded-faudi overflow-hidden border-2 border-brand-black bg-[#FAF5EE] my-2 flex items-center justify-center">
-                  {item.isComingSoon ? (
+                {/* Top Image */}
+                <div className="relative w-full h-52 sm:h-56 rounded-faudi overflow-hidden border-2 border-brand-black bg-[#FAF5EE] my-2 flex items-center justify-center group">
+                  {isComingSoon ? (
                     <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-gray-50 border-2 border-dashed border-gray-300">
                       <Clock className="w-8 h-8 text-gray-400 mb-2 animate-pulse" />
                       <span className="font-sub font-bold text-xs uppercase tracking-wider text-gray-700">
@@ -75,27 +85,30 @@ export default function SnacksZone() {
                         Upcoming batch dropping soon
                       </span>
                     </div>
+                  ) : imgSrc ? (
+                    <img
+                      src={imgSrc}
+                      alt={item.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
                   ) : (
-                    /* Neutral placeholder box as requested */
-                    <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-amber-50/70 border-2 border-dashed border-brand-black/25">
-                      <div className="p-3 rounded-full bg-white border-2 border-brand-black mb-2 shadow-bold-sm">
-                        <Flame className="w-5 h-5 text-brand-orange" />
-                      </div>
-                      <span className="font-sub font-bold text-xs uppercase tracking-wider text-brand-black bg-white/90 px-2 py-0.5 rounded border border-brand-black/20">
-                        Add photo: {item.image.replace('/images/', '')}
-                      </span>
-                      <span className="text-[11px] text-brand-black/60 font-body mt-1.5 max-w-[200px]">
-                        Save your photo to <code className="bg-amber-100 px-1 rounded font-mono">public{item.image}</code>
+                    <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-amber-50">
+                      <Flame className="w-8 h-8 text-brand-orange mb-1" />
+                      <span className="font-sub font-bold text-xs uppercase tracking-wider text-brand-black">
+                        {item.name}
                       </span>
                     </div>
                   )}
 
                   {/* Pack Size Pill */}
-                  <div className="absolute bottom-2.5 right-2.5">
-                    <span className="px-2.5 py-1 rounded-faudi bg-brand-black text-white font-sub text-xs font-bold uppercase tracking-wider">
-                      {item.packSize}
-                    </span>
-                  </div>
+                  {packSize && (
+                    <div className="absolute bottom-2.5 right-2.5">
+                      <span className="px-2.5 py-1 rounded-faudi bg-brand-black text-white font-sub text-xs font-bold uppercase tracking-wider">
+                        {packSize}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Details */}
@@ -120,13 +133,13 @@ export default function SnacksZone() {
                       </span>
                     </div>
 
-                    {item.isComingSoon ? (
+                    {isComingSoon ? (
                       <span className="inline-flex items-center gap-1 px-3 py-2 rounded-faudi bg-gray-100 text-gray-500 font-sub font-bold text-xs uppercase tracking-wider border border-gray-300">
                         COMING SOON
                       </span>
                     ) : (
                       <a
-                        href={getWhatsAppOrderLink(item.name, "Kasaragod Snacks", `Pack: ${item.packSize}, Price: ${item.mrp}`)}
+                        href={getWhatsAppOrderLink(item.name, "Kasaragod Snacks", `Pack: ${packSize}, Price: ${item.mrp}`)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-faudi bg-brand-orange text-white font-sub font-bold text-xs uppercase tracking-wider hover:bg-brand-black transition-colors shadow-bold-sm active:translate-y-0.5"
@@ -140,14 +153,6 @@ export default function SnacksZone() {
               </div>
             );
           })}
-        </div>
-
-        {/* Small Notice for Placeholders */}
-        <div className="mt-12 p-4 rounded-faudi bg-amber-100/60 border border-amber-300 flex items-center gap-3 max-w-xl mx-auto text-xs text-brand-black/70 font-body">
-          <AlertCircle className="w-4 h-4 text-brand-orange shrink-0" />
-          <span>
-            <strong>Photo Note:</strong> Drop your snack photos into <code className="bg-white px-1 py-0.5 rounded font-mono font-bold text-brand-black">/public/images/snacks/</code> to automatically replace placeholder cards.
-          </span>
         </div>
       </div>
     </section>

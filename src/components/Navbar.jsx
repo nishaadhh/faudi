@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { BRAND_CONFIG, getWhatsAppOrderLink } from '../data/products';
-import { Menu, X, ArrowUpRight, MessageCircle } from 'lucide-react';
+import { useData } from '../context/DataContext';
+import { Menu, X, ArrowUpRight, MessageCircle, ShieldCheck } from 'lucide-react';
 
-export default function Navbar({ activeSection }) {
+export default function Navbar({ activeSection, onOpenAdmin }) {
+  const { getWhatsAppOrderLink, siteSettings } = useData();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -89,6 +90,7 @@ export default function Navbar({ activeSection }) {
 
           {/* Right Action: WhatsApp Pill Button */}
           <div className="hidden sm:flex items-center gap-3">
+
             <a
               href={getWhatsAppOrderLink("General Menu", "Order")}
               target="_blank"
@@ -163,7 +165,7 @@ export default function Navbar({ activeSection }) {
               <span>ORDER ON WHATSAPP</span>
             </a>
             <p className="text-xs text-white/50 text-center font-body">
-              Instant customer response • {BRAND_CONFIG.whatsappNumber}
+              Instant customer response • {siteSettings.whatsapp_number}
             </p>
           </div>
         </div>

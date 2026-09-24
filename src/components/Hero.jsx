@@ -1,12 +1,10 @@
 import React from 'react';
 import { ArrowDownRight, Sparkles, Flame, Cookie } from 'lucide-react';
-import { BRAND_CONFIG } from '../data/products';
+import { useData } from '../context/DataContext';
 
 export default function Hero() {
-  // Headline options:
-  // Default: "GOOD FOOD. BIG MOOD."
-  // Alternate option: "MEET FAUDI."
-  const heroHeadline = BRAND_CONFIG.tagline; // "GOOD FOOD. BIG MOOD."
+  const { siteSettings } = useData();
+  const heroHeadline = siteSettings.tagline || "GOOD FOOD. BIG MOOD.";
 
   const worlds = [
     {
@@ -19,7 +17,7 @@ export default function Hero() {
       borderColor: "border-[#F79824]",
       accentTag: "Kasaragod Crunch",
       image: "/images/snacks/soratta.jpg",
-      isPhotoPlaceholder: true,
+      isPhotoPlaceholder: false,
       placeholderLabel: "Add photo: snacks/soratta.jpg",
       icon: Flame,
       tagColor: "bg-red-500 text-white",

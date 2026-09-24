@@ -1,9 +1,9 @@
 import React from 'react';
-import { BRAND_CONFIG, getWhatsAppOrderLink } from '../data/products';
-import { ArrowUp, MessageCircle, Phone, Mail, MapPin, Award } from 'lucide-react';
+import { useData } from '../context/DataContext';
+import { ArrowUp, MessageCircle, Phone, Mail, MapPin, Award, Lock } from 'lucide-react';
 
-export default function Footer() {
-  const { contact } = BRAND_CONFIG;
+export default function Footer({ onOpenAdmin }) {
+  const { siteSettings, getWhatsAppOrderLink } = useData();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -35,7 +35,7 @@ export default function Footer() {
             </p>
             <div className="mt-6 flex items-center gap-3">
               <a
-                href={contact.instagram}
+                href={siteSettings.instagram || "https://instagram.com/faudi.bites"}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -46,7 +46,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href={contact.facebook}
+                href={siteSettings.facebook || "https://facebook.com/faudifood"}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
@@ -88,17 +88,17 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Clearly Tagged Placeholders (Contact & Regulatory) */}
+          {/* Business Details */}
           <div className="lg:col-span-5">
             <h4 className="font-sub font-bold text-xs uppercase tracking-widest text-brand-yellow mb-4">
-              BUSINESS DETAILS (PLACEHOLDERS)
+              BUSINESS & CONTACT
             </h4>
             <div className="space-y-3 text-sm text-white/75 font-body">
               <div className="flex items-start gap-2.5">
                 <Phone className="w-4 h-4 text-brand-orange shrink-0 mt-0.5" />
                 <div>
                   <span className="text-[10px] font-sub font-bold uppercase tracking-wider text-white/40 block">Phone</span>
-                  <span>{contact.phone}</span>
+                  <span>{siteSettings.phone}</span>
                 </div>
               </div>
 
@@ -106,7 +106,7 @@ export default function Footer() {
                 <Mail className="w-4 h-4 text-brand-orange shrink-0 mt-0.5" />
                 <div>
                   <span className="text-[10px] font-sub font-bold uppercase tracking-wider text-white/40 block">Email</span>
-                  <span>{contact.email}</span>
+                  <span>{siteSettings.email}</span>
                 </div>
               </div>
 
@@ -114,7 +114,7 @@ export default function Footer() {
                 <MapPin className="w-4 h-4 text-brand-orange shrink-0 mt-0.5" />
                 <div>
                   <span className="text-[10px] font-sub font-bold uppercase tracking-wider text-white/40 block">Registered Facility</span>
-                  <span>{contact.address}</span>
+                  <span>{siteSettings.address}</span>
                 </div>
               </div>
 
@@ -122,7 +122,7 @@ export default function Footer() {
                 <Award className="w-4 h-4 text-brand-yellow shrink-0 mt-0.5" />
                 <div>
                   <span className="text-[10px] font-sub font-bold uppercase tracking-wider text-brand-yellow/80 block">Regulatory Compliance</span>
-                  <span className="font-mono text-xs">{contact.fssai}</span>
+                  <span className="font-mono text-xs">{siteSettings.fssai}</span>
                 </div>
               </div>
             </div>
