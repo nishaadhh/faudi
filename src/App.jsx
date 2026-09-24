@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { DataProvider, useData } from './context/DataContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import MarqueeStrip from './components/MarqueeStrip';
@@ -8,9 +9,32 @@ import NutChocolateZone from './components/NutChocolateZone';
 import WhyFaudi from './components/WhyFaudi';
 import RetailersCTA from './components/RetailersCTA';
 import Footer from './components/Footer';
+import AdminPortal from './admin/AdminPortal';
 
-export default function App() {
+function MainApp() {
   const [activeSection, setActiveSection] = useState('hero');
+  const [currentPath, setCurrentPath] = useState(() => {
+    return typeof window !== 'undefined' ? window.location.pathname : '/';
+  });
+
+  const { siteSettings } = useData();
+
+  // Listen to browser navigation (back/forward)
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const navigate = (path) => {
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', path);
+      setCurrentPath(path);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const sections = ['hero', 'snacks', 'buns', 'chocolate', 'why-faudi', 'retailers'];
@@ -30,6 +54,39 @@ export default function App() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Secret Keyboard shortcut: Ctrl + Shift + A / Cmd + Shift + A
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        if (currentPath === '/god' || currentPath.startsWith('/god/')) {
+          navigate('/');
+        } else {
+          navigate('/god');
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentPath]);
+
+  const isGodAdmin =
+    currentPath === '/god' ||
+    currentPath.startsWith('/god/') ||
+    (typeof window !== 'undefined' && window.location.search.includes('admin=true'));
+
+  // If visiting /god, show dedicated full-page Admin Portal
+  if (isGodAdmin) {
+    return (
+      <AdminPortal
+        isStandalonePage={true}
+        isOpen={true}
+        onClose={() => navigate('/')}
+      />
+    );
+  }
+
+  // Otherwise, render Public Customer Storefront
   return (
     <div className="min-h-screen bg-brand-cream text-brand-black selection:bg-brand-yellow selection:text-brand-black relative">
       {/* Sticky Adaptive Navigation */}
@@ -39,9 +96,12 @@ export default function App() {
         {/* Hero Section */}
         <Hero />
 
-        {/* Marquee Strip 1 */}
+        {/* Marquee Strip 1: Kasaragod Snacks */}
         <MarqueeStrip
-          text="FAUDI FOODS ★ CRUNCH HARDER ★ KASARAGOD SNACKS ★ OBSESSIVELY CRAFTED ★ GOOD FOOD. BIG MOOD. ★"
+          text={
+            siteSettings.marquee_snacks ||
+            'FAUDI FOODS ★ CRUNCH HARDER ★ KASARAGOD SNACKS ★ OBSESSIVELY CRAFTED ★ GOOD FOOD. BIG MOOD. ★'
+          }
           bg="bg-brand-black"
           textColor="text-brand-yellow"
           py="py-3.5 sm:py-4"
@@ -50,9 +110,12 @@ export default function App() {
         {/* Zone 1: Kasaragod Snacks */}
         <SnacksZone />
 
-        {/* Marquee Strip 2 */}
+        {/* Marquee Strip 2: Cream Buns */}
         <MarqueeStrip
-          text="BUN. FILLED. DONE. ★ PILLOWY BRIOCHE ★ PISTACHIO KUNAFA ★ CHOCOLATE HAZELNUT ★ FRESH CHILLED DROPS ★"
+          text={
+            siteSettings.marquee_buns ||
+            'BUN. FILLED. DONE. ★ PILLOWY BRIOCHE ★ PISTACHIO KUNAFA ★ CHOCOLATE HAZELNUT ★ FRESH CHILLED DROPS ★'
+          }
           bg="bg-brand-orange"
           textColor="text-white"
           reverse={true}
@@ -62,9 +125,12 @@ export default function App() {
         {/* Zone 2: Cream Buns */}
         <CreamBunsZone />
 
-        {/* Marquee Strip 3 */}
+        {/* Marquee Strip 3: Nut Chocolate Bars */}
         <MarqueeStrip
-          text="NUTS ABOUT CHOCOLATE ★ HEAVYWEIGHT DARK BARS ★ WHOLE ROASTED NUTS ★ MADE TO SHARE ★ MADE TO GIFT ★"
+          text={
+            siteSettings.marquee_chocolate ||
+            'NUTS ABOUT CHOCOLATE ★ HEAVYWEIGHT DARK BARS ★ WHOLE ROASTED NUTS ★ MADE TO SHARE ★ MADE TO GIFT ★'
+          }
           bg="bg-[#E5A93C]"
           textColor="text-brand-black"
           py="py-3.5 sm:py-4"
@@ -83,5 +149,13 @@ export default function App() {
       {/* Footer */}
       <Footer />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <DataProvider>
+      <MainApp />
+    </DataProvider>
   );
 }

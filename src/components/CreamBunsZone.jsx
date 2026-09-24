@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
-import { CREAM_BUNS_DATA, getWhatsAppOrderLink } from '../data/products';
+import { useData } from '../context/DataContext';
+import { CREAM_BUNS_DATA } from '../data/products';
 import { ArrowUpRight, Check, Sparkles, MessageCircle, Package, Heart } from 'lucide-react';
 
 export default function CreamBunsZone() {
-  const { headline, subheadline, flavors, howToOrder, boxMockup } = CREAM_BUNS_DATA;
-  const [selectedFlavorId, setSelectedFlavorId] = useState(flavors[0].id);
+  const { products, getWhatsAppOrderLink } = useData();
+  const { headline, subheadline, howToOrder, boxMockup } = CREAM_BUNS_DATA;
 
-  const activeFlavor = flavors.find((f) => f.id === selectedFlavorId) || flavors[0];
+  const dynamicFlavors = products.filter((p) => p.category === 'buns' && p.is_active !== false);
+  const flavors = dynamicFlavors.length > 0 ? dynamicFlavors : CREAM_BUNS_DATA.flavors;
+
+  const [selectedFlavorId, setSelectedFlavorId] = useState(flavors[0]?.id || 'chocolate-hazelnut');
+
+  const activeFlavor = flavors.find((f) => f.id === selectedFlavorId) || flavors[0] || {};
+  const activeImg = activeFlavor.image_url || activeFlavor.image;
+  const activeScript = activeFlavor.script_tag || activeFlavor.scriptTag;
+  const activePack = activeFlavor.pack_size || activeFlavor.packSize;
 
   return (
     <section id="buns" className="relative w-full py-20 sm:py-28 bg-[#FAF4E8] border-b-2 border-brand-black overflow-hidden">
@@ -41,29 +50,33 @@ export default function CreamBunsZone() {
               <div className="relative w-full aspect-square max-w-md rounded-faudi-lg overflow-hidden border-3 border-brand-black bg-[#F5EDE0] shadow-bold group">
                 <img
                   key={activeFlavor.id}
-                  src={activeFlavor.image}
+                  src={activeImg}
                   alt={activeFlavor.name}
                   className="w-full h-full object-cover transition-all duration-500 transform group-hover:scale-105"
                 />
 
                 {/* Badge Sticker */}
-                <div className="absolute top-4 left-4 z-10">
-                  <span className="px-3.5 py-1.5 rounded-faudi bg-brand-yellow text-brand-black font-sub font-bold text-xs uppercase tracking-wider border-2 border-brand-black shadow-bold-sm">
-                    {activeFlavor.badge}
-                  </span>
-                </div>
+                {activeFlavor.badge && (
+                  <div className="absolute top-4 left-4 z-10">
+                    <span className="px-3.5 py-1.5 rounded-faudi bg-brand-yellow text-brand-black font-sub font-bold text-xs uppercase tracking-wider border-2 border-brand-black shadow-bold-sm">
+                      {activeFlavor.badge}
+                    </span>
+                  </div>
+                )}
 
                 {/* Script Font Tag from Attached Image ("Dubai Chewy Cookie" style callout) */}
-                <div className="absolute bottom-4 right-4 z-10">
-                  <span className="px-4 py-1.5 rounded-faudi bg-white/95 backdrop-blur-sm border-2 border-brand-black font-script text-xl sm:text-2xl text-brand-black shadow-bold-sm transform -rotate-3 inline-block">
-                    {activeFlavor.scriptTag}
-                  </span>
-                </div>
+                {activeScript && (
+                  <div className="absolute bottom-4 right-4 z-10">
+                    <span className="px-4 py-1.5 rounded-faudi bg-white/95 backdrop-blur-sm border-2 border-brand-black font-script text-xl sm:text-2xl text-brand-black shadow-bold-sm transform -rotate-3 inline-block">
+                      {activeScript}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Pack info pill */}
               <div className="mt-4 flex items-center gap-3 text-xs font-sub font-bold uppercase tracking-wider text-brand-black/70">
-                <span>{activeFlavor.packSize}</span>
+                <span>{activePack || 'Single Bun (140g)'}</span>
                 <span>•</span>
                 <span>Chilled Delivery Ready</span>
               </div>
@@ -82,18 +95,22 @@ export default function CreamBunsZone() {
                 </h3>
 
                 {/* Elegant Italic Script Accent */}
-                <p className="font-script text-2xl sm:text-3xl text-amber-800 mt-1">
-                  ~ {activeFlavor.scriptTag} ~
-                </p>
+                {activeScript && (
+                  <p className="font-script text-2xl sm:text-3xl text-amber-800 mt-1">
+                    ~ {activeScript} ~
+                  </p>
+                )}
 
                 <p className="mt-3 text-base text-brand-black/80 font-body leading-relaxed">
                   {activeFlavor.description}
                 </p>
 
-                <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-faudi bg-amber-50 border border-amber-200 text-xs font-body text-amber-900">
-                  <Heart className="w-3.5 h-3.5 text-brand-orange fill-brand-orange" />
-                  <span>{activeFlavor.notes}</span>
-                </div>
+                {activeFlavor.notes && (
+                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-faudi bg-amber-50 border border-amber-200 text-xs font-body text-amber-900">
+                    <Heart className="w-3.5 h-3.5 text-brand-orange fill-brand-orange" />
+                    <span>{activeFlavor.notes}</span>
+                  </div>
+                )}
 
                 {/* Flavor Selection Buttons */}
                 <div className="mt-6">
@@ -139,7 +156,7 @@ export default function CreamBunsZone() {
                   href={getWhatsAppOrderLink(
                     `${activeFlavor.name} Cream Bun`,
                     "Cream Buns",
-                    `Flavor: ${activeFlavor.name}, Size: ${activeFlavor.packSize}, Price: ${activeFlavor.mrp}`
+                    `Flavor: ${activeFlavor.name}, Size: ${activePack || 'Single Bun'}, Price: ${activeFlavor.mrp}`
                   )}
                   target="_blank"
                   rel="noopener noreferrer"

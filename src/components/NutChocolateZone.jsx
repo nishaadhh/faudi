@@ -1,10 +1,29 @@
 import React, { useRef } from 'react';
-import { NUT_CHOCOLATE_DATA, BRAND_CONFIG, getWhatsAppOrderLink } from '../data/products';
+import { useData } from '../context/DataContext';
+import { NUT_CHOCOLATE_DATA } from '../data/products';
 import { ArrowUpRight, Gift, ChevronRight, ChevronLeft, Sparkles, MessageCircle } from 'lucide-react';
 
 export default function NutChocolateZone() {
-  const { headline, subheadline, heroImage, variants, giftBox } = NUT_CHOCOLATE_DATA;
+  const { products, getWhatsAppOrderLink } = useData();
+  const { headline, subheadline, heroImage } = NUT_CHOCOLATE_DATA;
   const scrollContainerRef = useRef(null);
+
+  const dynamicVariants = products.filter((p) => p.category === 'chocolate' && p.is_active !== false);
+  const variants = dynamicVariants.length > 0 ? dynamicVariants : NUT_CHOCOLATE_DATA.variants;
+
+  const dynamicGift = products.find((p) => p.category === 'gift');
+  const giftBox = dynamicGift
+    ? {
+        title: dynamicGift.name,
+        subtitle: dynamicGift.nut_type || NUT_CHOCOLATE_DATA.giftBox.subtitle,
+        description: dynamicGift.description,
+        packSize: dynamicGift.pack_size || dynamicGift.packSize,
+        mrp: dynamicGift.mrp,
+        image: dynamicGift.image_url || dynamicGift.image || NUT_CHOCOLATE_DATA.giftBox.image,
+        badge: dynamicGift.badge || NUT_CHOCOLATE_DATA.giftBox.badge,
+        whatsappMessage: dynamicGift.notes || NUT_CHOCOLATE_DATA.giftBox.whatsappMessage,
+      }
+    : NUT_CHOCOLATE_DATA.giftBox;
 
   const scroll = (direction) => {
     if (scrollContainerRef.current) {
@@ -101,66 +120,78 @@ export default function NutChocolateZone() {
           className="flex gap-6 overflow-x-auto pb-8 pt-2 scroll-smooth no-scrollbar snap-x snap-mandatory"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {variants.map((bar) => (
-            <div
-              key={bar.id}
-              className="min-w-[280px] sm:min-w-[320px] max-w-[320px] snap-start flex flex-col justify-between p-5 rounded-faudi-lg bg-[#1D1412] border-2 border-white/15 hover:border-[#E5A93C] transition-all duration-300 hover:-translate-y-2 shadow-xl group"
-            >
-              <div>
-                {/* Variant Image */}
-                <div className="relative w-full h-48 rounded-faudi overflow-hidden border border-white/10 bg-black/40 mb-4">
-                  <img
-                    src={bar.image}
-                    alt={bar.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-2.5 left-2.5">
-                    <span className="px-2.5 py-0.5 rounded-faudi bg-[#E5A93C] text-black font-sub text-[10px] font-bold uppercase tracking-wider">
-                      {bar.badge}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-2.5 right-2.5">
-                    <span className="px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-sm text-white font-sub text-[10px] font-bold uppercase">
-                      {bar.packSize}
-                    </span>
-                  </div>
-                </div>
+          {variants.map((bar) => {
+            const barImg = bar.image_url || bar.image;
+            const barPack = bar.pack_size || bar.packSize;
+            const barNut = bar.nut_type || bar.nutType;
 
-                <span className="text-[11px] font-sub font-bold uppercase tracking-wider text-[#E5A93C]">
-                  {bar.nutType}
-                </span>
-                <h4 className="font-display text-xl uppercase tracking-tight text-white mt-1 group-hover:text-[#E5A93C] transition-colors leading-tight">
-                  {bar.name}
-                </h4>
-                <p className="mt-1.5 text-xs text-white/70 font-body line-clamp-2">
-                  {bar.description}
-                </p>
-              </div>
-
-              {/* Price and Order Button */}
-              <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
+            return (
+              <div
+                key={bar.id}
+                className="min-w-[280px] sm:min-w-[320px] max-w-[320px] snap-start flex flex-col justify-between p-5 rounded-faudi-lg bg-[#1D1412] border-2 border-white/15 hover:border-[#E5A93C] transition-all duration-300 hover:-translate-y-2 shadow-xl group"
+              >
                 <div>
-                  <span className="text-[9px] font-sub font-bold uppercase tracking-wider text-white/50 block">
-                    PRICE
-                  </span>
-                  <span className="font-display text-2xl text-white">
-                    {bar.mrp}
-                  </span>
+                  {/* Variant Image */}
+                  <div className="relative w-full h-48 rounded-faudi overflow-hidden border border-white/10 bg-black/40 mb-4">
+                    <img
+                      src={barImg}
+                      alt={bar.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    {bar.badge && (
+                      <div className="absolute top-2.5 left-2.5">
+                        <span className="px-2.5 py-0.5 rounded-faudi bg-[#E5A93C] text-black font-sub text-[10px] font-bold uppercase tracking-wider">
+                          {bar.badge}
+                        </span>
+                      </div>
+                    )}
+                    {barPack && (
+                      <div className="absolute bottom-2.5 right-2.5">
+                        <span className="px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-sm text-white font-sub text-[10px] font-bold uppercase">
+                          {barPack}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {barNut && (
+                    <span className="text-[11px] font-sub font-bold uppercase tracking-wider text-[#E5A93C]">
+                      {barNut}
+                    </span>
+                  )}
+                  <h4 className="font-display text-xl uppercase tracking-tight text-white mt-1 group-hover:text-[#E5A93C] transition-colors leading-tight">
+                    {bar.name}
+                  </h4>
+                  <p className="mt-1.5 text-xs text-white/70 font-body line-clamp-2">
+                    {bar.description}
+                  </p>
                 </div>
 
-                <a
-                  href={getWhatsAppOrderLink(bar.name, "Nut Chocolate Bars", `Pack: ${bar.packSize}, Price: ${bar.mrp}`)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-faudi bg-white text-black font-sub font-bold text-xs uppercase tracking-wider hover:bg-[#E5A93C] transition-colors shadow-sm"
-                >
-                  <span>Order</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </a>
+                {/* Price and Order Button */}
+                <div className="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
+                  <div>
+                    <span className="text-[9px] font-sub font-bold uppercase tracking-wider text-white/50 block">
+                      PRICE
+                    </span>
+                    <span className="font-display text-2xl text-white">
+                      {bar.mrp}
+                    </span>
+                  </div>
+
+                  <a
+                    href={getWhatsAppOrderLink(bar.name, "Nut Chocolate Bars", `Pack: ${barPack || 'Slab'}, Price: ${bar.mrp}`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-faudi bg-white text-black font-sub font-bold text-xs uppercase tracking-wider hover:bg-[#E5A93C] transition-colors shadow-sm"
+                  >
+                    <span>Order</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </a>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* GIFT BOX SUB-SECTION: "MADE TO SHARE. MADE TO GIFT." */}

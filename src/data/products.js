@@ -7,16 +7,16 @@ export const BRAND_CONFIG = {
   // Alternate headline options:
   // tagline: "MEET FAUDI.",
   
-  // WhatsApp ordering phone number (Placeholder: Replace with your actual WhatsApp business number with country code, e.g., "919876543210")
-  whatsappNumber: "91XXXXXXXXXX", 
+  // WhatsApp ordering phone number
+  whatsappNumber: "919562313752", 
   
   contact: {
-    phone: "+91 XXXXXXXXXX", // [PLACEHOLDER]
-    email: "hello@faudifood.com", // [PLACEHOLDER]
-    address: "Kasaragod, Kerala, India - 671121", // [PLACEHOLDER]
-    fssai: "FSSAI Lic. No. 1XXXXXXXXXXXXX", // [PLACEHOLDER]
-    instagram: "https://instagram.com/faudifood", // [PLACEHOLDER]
-    facebook: "https://facebook.com/faudifood", // [PLACEHOLDER]
+    phone: "+91 9562313752",
+    email: "faudifoods@gmail.com",
+    address: "Kasaragod, Kerala, India - 671121",
+    fssai: "FSSAI Lic. No. 1XXXXXXXXXXXXX", // [PLACEHOLDER - edit in Admin]
+    instagram: "https://instagram.com/faudi.bites",
+    facebook: "https://facebook.com/faudifood",
   },
   
   whyFaudi: [

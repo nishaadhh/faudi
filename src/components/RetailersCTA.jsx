@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { getWhatsAppBulkLink } from '../data/products';
+import { useData } from '../context/DataContext';
 import { MessageCircle, Store, Send, CheckCircle2 } from 'lucide-react';
 
 export default function RetailersCTA() {
+  const { getWhatsAppBulkLink, submitInquiry } = useData();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -14,8 +15,9 @@ export default function RetailersCTA() {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    await submitInquiry(formData);
     const link = getWhatsAppBulkLink(formData);
     window.open(link, '_blank');
   };
